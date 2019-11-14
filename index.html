@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>微博发布效果</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .weibo {
+        width: 600px;
+        border: 1px solid #ccc;
+
+        margin: 100px auto;
+        padding: 10px;
+      }
+
+      .weibo-text {
+        width: 590px;
+        height: 140px;
+        padding: 5px;
+        border: 1px solid #ccc;
+        outline: none;
+        resize: none;
+      }
+
+      .weibo-text:focus {
+        border-color: #f60;
+      }
+
+      .weibo-btn {
+        width: 80px;
+        height: 30px;
+        background-color: #f90;
+        color: #fff;
+        border: 0 none;
+        margin-top: 5px;
+        border-radius: 3px;
+        cursor: pointer;
+        outline: 0 none;
+      }
+
+      .weibo-list {
+        padding-top: 10px;
+      }
+
+      .weibo-list li {
+        font-size: 14px;
+        line-height: 30px;
+        border-bottom: 1px dotted #ccc;
+        overflow: hidden;
+      }
+
+      .weibo-list li p {
+        float: left;
+      }
+
+      .weibo-list li span {
+        float: right;
+        cursor: pointer;
+      }
+
+      .weibo-list li input {
+        height: 24px;
+        line-height: 24px;
+        width: 300px;
+        font-size: 14px;
+        border: 0 none;
+      }
+      .time {
+        margin-right: 10px;
+        font-style: normal;
+        float: right;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="weibo">
+      <textarea class="weibo-text"></textarea>
+      <input class="weibo-btn" value="发布" type="button" />
+      <ul class="weibo-list">
+        <!-- <li>
+            <p class="content">快来收了这九款用上就停不下来的应用吧！！</p>
+            <span class="time"></span>
+            <span class="del">删除</span>
+        </li> -->
+      </ul>
+    </div>
+  </body>
+</html>
+<script>
+  var arr = getData();
+  function patchZero(v) {
+    return v < 10 ? "0" + v : v;
+  }
+  function formatDate() {
+    var now = new Date();
+    var y = now.getFullYear();
+    var m = now.getMonth();
+    var d = now.getDate();
+    var h = now.getHours();
+    var mm = now.getMinutes();
+    var s = now.getSeconds();
+    return (
+      y +
+      "-" +
+      patchZero(m) +
+      "-" +
+      patchZero(d) +
+      " " +
+      patchZero(h) +
+      ":" +
+      patchZero(mm) +
+      ":" +
+      patchZero(s)
+    );
+  }
+  function getData() {
+    let data = localStorage.getItem("info");
+    data = JSON.parse(data);
+    return data || [];
+  }
+  function setData(arr) {
+    localStorage.setItem("info", JSON.stringify(arr));
+  }
+  let text = document.querySelector(".weibo-text");
+  let btn = document.querySelector(".weibo-btn");
+  let ul = document.querySelector(".weibo-list");
+  let id = 0;
+  function upData() {
+    let content = text.value;
+    let time = formatDate();
+    ul.innerHTML = "";
+    arr.forEach(function(e,i) {
+      if (id < e.id) {
+        id = e.id;
+      }
+    })
+    id++;
+    content ? arr.unshift({ content: content, time: time ,id: id}) : 0;
+    setData(arr);
+    arr.forEach(function(ele, index) {
+      let li = document.createElement("li");
+      li.innerHTML =
+        '<p class="content">' +
+        ele.content +
+        '</p>\
+                        <span class="del" data-index=' +
+        ele.id +
+        '>删除</span>\
+                        <span class="time">' +
+        ele.time +
+        "</span>";
+      ul.appendChild(li);
+    });
+    text.value = "";
+  }
+  upData();
+  btn.addEventListener("click", function() {
+    upData();
+  });
+  text.addEventListener("keydown", function(e) {
+    if (e.keyCode == 13 && e.ctrlKey) {
+      upData();
+    }
+  });
+  ul.addEventListener("click", function(e) {
+    if (e.target.classList.contains("del")) {
+      var num = e.target.dataset.index;
+      arr = arr.filter(function(ele) {
+        return num != ele.id;
+      })
+      upData();
+    }
+  });
+</script>
